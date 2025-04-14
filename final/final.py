@@ -1,6 +1,5 @@
 import random
 
-# Card Class
 class Card:
     def __init__(self, suit, value):
         self.suit = suit
@@ -19,9 +18,6 @@ class Deck:
 
     def shuffle(self):
         random.shuffle(self.cards)
-
-    def deal(self):
-        return self.cards.pop()
 
 # Shoe Class
 class Shoe:
@@ -63,14 +59,11 @@ class Player:
             else:
                 value += int(card.value)
         for _ in range(aces):
-            if value + 11 <= 21:
-                value += 11
-            else:
-                value += 1
+            value += 11 if value + 11 <= 21 else 1
         return value
 
     def __repr__(self):
-        return f"Player {self.name} with hand {self.hand} and value {self.get_hand_value()}"
+        return f"{self.name} hand: {self.hand} | Value: {self.get_hand_value()}"
 
 # Dealer Class
 class Dealer(Player):
@@ -80,49 +73,62 @@ class Dealer(Player):
     def should_hit(self):
         return self.get_hand_value() < 17
 
-# Example of how to use these classes to start a game of Blackjack
+# Blackjack Game Function
 def play_blackjack():
     shoe = Shoe()
-    player = Player("Player 1")
+    player = Player("Player")
     dealer = Dealer()
 
-    # Deal initial cards
+    # Deal initial hands
     player.add_card(shoe.deal())
     dealer.add_card(shoe.deal())
     player.add_card(shoe.deal())
     dealer.add_card(shoe.deal())
 
-    print("Initial hands:")
+    print("\nInitial hands:")
     print(player)
-    print(dealer)
+    print(f"Dealer shows: {dealer.hand[0]}")
 
     # Player's turn
     while True:
-        action = input("Do you want to hit or stand? (h/s): ")
-        if action.lower() == 'h':
+        action = input("Hit or stand? (h/s): ").lower()
+        if action not in ['h', 's']:
+            print("Please enter 'h' or 's'")
+            continue
+        if action == 'h':
             player.add_card(shoe.deal())
             print(player)
             if player.get_hand_value() > 21:
-                print("Bust! Dealer wins.")
+                print("Player busts! Dealer wins.\n")
                 return
         else:
             break
 
     # Dealer's turn
+    print("\nDealer's turn:")
+    print(dealer)
     while dealer.should_hit():
         dealer.add_card(shoe.deal())
         print(dealer)
         if dealer.get_hand_value() > 21:
-            print("Dealer busts! Player wins.")
+            print("Dealer busts! Player wins.\n")
             return
 
-    # Determine the winner
-    if player.get_hand_value() > dealer.get_hand_value():
-        print("Player wins!")
-    elif player.get_hand_value() < dealer.get_hand_value():
-        print("Dealer wins!")
+    # Determine winner
+    player_val = player.get_hand_value()
+    dealer_val = dealer.get_hand_value()
+    print()
+    if player_val > dealer_val:
+        print("Player wins!\n")
+    elif player_val < dealer_val:
+        print("Dealer wins!\n")
     else:
-        print("It's a tie!")
+        print("It's a tie!\n")
 
 if __name__ == "__main__":
-    play_blackjack()
+    while True:
+        play_blackjack()
+        again = input("Play again? (y/n): ").lower()
+        if again != 'y':
+            print("Thanks for playing!")
+            break
