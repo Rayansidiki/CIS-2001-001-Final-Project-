@@ -5,21 +5,20 @@ class Card:
         self.suit = suit
         self.value = value
 
-    def __repr__(self):
+    def __str__(self):
         return f"{self.value} of {self.suit}"
 
-# Deck Class
 class Deck:
     suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
     values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
 
     def __init__(self):
         self.cards = [Card(suit, value) for suit in Deck.suits for value in Deck.values]
+        self.shuffle()
 
     def shuffle(self):
         random.shuffle(self.cards)
 
-# Shoe Class
 class Shoe:
     def __init__(self, num_decks=6):
         self.num_decks = num_decks
@@ -30,7 +29,6 @@ class Shoe:
         self.cards = []
         for _ in range(self.num_decks):
             deck = Deck()
-            deck.shuffle()
             self.cards.extend(deck.cards)
         random.shuffle(self.cards)
 
@@ -39,7 +37,6 @@ class Shoe:
             self.reshuffle()
         return self.cards.pop()
 
-# Player Class
 class Player:
     def __init__(self, name):
         self.name = name
@@ -48,9 +45,11 @@ class Player:
     def add_card(self, card):
         self.hand.append(card)
 
+    def reset_hand(self):
+        self.hand = []
+
     def get_hand_value(self):
-        value = 0
-        aces = 0
+        value, aces = 0, 0
         for card in self.hand:
             if card.value in ["J", "Q", "K"]:
                 value += 10
@@ -62,10 +61,10 @@ class Player:
             value += 11 if value + 11 <= 21 else 1
         return value
 
-    def __repr__(self):
-        return f"{self.name} hand: {self.hand} | Value: {self.get_hand_value()}"
+    def __str__(self):
+        cards = ', '.join(str(card) for card in self.hand)
+        return f"{self.name}'s hand: [{cards}] | Value: {self.get_hand_value()}"
 
-# Dealer Class
 class Dealer(Player):
     def __init__(self):
         super().__init__("Dealer")
@@ -73,61 +72,54 @@ class Dealer(Player):
     def should_hit(self):
         return self.get_hand_value() < 17
 
-# Blackjack Game Function
 def play_blackjack():
     shoe = Shoe()
     player = Player("Player")
     dealer = Dealer()
 
-    # Deal initial hands
-    player.add_card(shoe.deal())
-    dealer.add_card(shoe.deal())
-    player.add_card(shoe.deal())
-    dealer.add_card(shoe.deal())
-
-    print("\nInitial hands:")
-    print(player)
-    print(f"Dealer shows: {dealer.hand[0]}")
-
-    # Player's turn
     while True:
-        action = input("Hit or stand? (h/s): ").lower()
-        if action not in ['h', 's']:
-            print("Please enter 'h' or 's'")
-            continue
-        if action == 'h':
+        player.reset_hand()
+        dealer.reset_hand()
+
+        for _ in range(2):
             player.add_card(shoe.deal())
-            print(player)
-            if player.get_hand_value() > 21:
-                print("Player busts! Dealer wins.\n")
-                return
+            dealer.add_card(shoe.deal())
+
+        print("\n--- New Round ---")
+        print(player)
+        print(f"Dealer shows: {dealer.hand[0]}")
+
+        while player.get_hand_value() < 21:
+            action = input("Hit or stand? (h/s): ").lower()
+            if action == 'h':
+                player.add_card(shoe.deal())
+                print(player)
+            elif action == 's':
+                break
+            else:
+                print("Please enter 'h' or 's'.")
+
+        if player.get_hand_value() > 21:
+            print("Player busts! Dealer wins.\n")
         else:
-            break
+            print("\nDealer's turn:")
+            print(dealer)
+            while dealer.should_hit():
+                dealer.add_card(shoe.deal())
+                print(dealer)
 
-    # Dealer's turn
-    print("\nDealer's turn:")
-    print(dealer)
-    while dealer.should_hit():
-        dealer.add_card(shoe.deal())
-        print(dealer)
-        if dealer.get_hand_value() > 21:
-            print("Dealer busts! Player wins.\n")
-            return
+            p_val = player.get_hand_value()
+            d_val = dealer.get_hand_value()
 
-    # Determine winner
-    player_val = player.get_hand_value()
-    dealer_val = dealer.get_hand_value()
-    print()
-    if player_val > dealer_val:
-        print("Player wins!\n")
-    elif player_val < dealer_val:
-        print("Dealer wins!\n")
-    else:
-        print("It's a tie!\n")
+            if d_val > 21:
+                print("Dealer busts! Player wins.\n")
+            elif p_val > d_val:
+                print("Player wins!\n")
+            elif p_val < d_val:
+                print("Dealer wins!\n")
+            else:
+                print("It's a tie!\n")
 
-if __name__ == "__main__":
-    while True:
-        play_blackjack()
         again = input("Play again? (y/n): ").lower()
         if again != 'y':
             print("Thanks for playing!")
