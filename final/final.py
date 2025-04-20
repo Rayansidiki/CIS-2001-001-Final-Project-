@@ -1,7 +1,6 @@
 import random
 from collections import defaultdict
 
-
 class Card:
     def __init__(self, suit, value):
         self.suit = suit
@@ -39,7 +38,6 @@ class Shoe:
             self.reshuffle()
         return self.cards.pop()
 
-
 class Player:
     def __init__(self, name):
         self.name = name
@@ -73,7 +71,6 @@ class Dealer(Player):
 
     def should_hit(self):
         return self.get_value() < 17
-
 
 def play_game():
     shoe = Shoe()
@@ -130,11 +127,11 @@ def play_game():
             print("Thanks for playing!")
             break
 
-
 def simulate_strategy():
     shoe = Shoe()
     results = defaultdict(lambda: {'hit': {'W': 0, 'L': 0, 'T': 0},
                                    'stand': {'W': 0, 'L': 0, 'T': 0}})
+    total = {'W': 0, 'L': 0, 'T': 0}
 
     def resolve(player, dealer):
         pv = player.get_value()
@@ -149,13 +146,11 @@ def simulate_strategy():
             return 'L'
         return 'T'
 
-    for _ in range(100_000):
+    for _ in range(100000):
         player = Player("Sim")
         dealer = Dealer()
-
         player.reset()
         dealer.reset()
-
         for _ in range(2):
             player.add_card(shoe.deal())
             dealer.add_card(shoe.deal())
@@ -166,7 +161,6 @@ def simulate_strategy():
             dv = 11 if up == 'A' else (10 if up in ['J', 'Q', 'K'] else int(up))
         except:
             continue
-
         if pv < 4 or pv > 21:
             continue
 
@@ -176,15 +170,15 @@ def simulate_strategy():
 
         outcome = resolve(player, dealer)
         results[(pv, dv)][action][outcome] += 1
+        total[outcome] += 1
 
     print("\n--- Simulation Results (100,000 rounds) ---")
     for key in sorted(results.keys()):
         p, d = key
         hit = results[key]['hit']
         stand = results[key]['stand']
-        print(f"P:{p} vs D:{d} | Hit → W:{hit['W']} L:{hit['L']} T:{hit['T']} | "
-              f"Stand → W:{stand['W']} L:{stand['L']} T:{stand['T']}")
-
+        print(f"P:{p} vs D:{d} | Hit → W:{hit['W']} L:{hit['L']} T:{hit['T']} | Stand → W:{stand['W']} L:{stand['L']} T:{stand['T']}")
+    print(f"\nTotal Results → Wins: {total['W']} | Losses: {total['L']} | Ties: {total['T']}")
 
 if __name__ == "__main__":
     mode = input("Type 'play' to play the game or 'sim' to run simulation: ").lower()
