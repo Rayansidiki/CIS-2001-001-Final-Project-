@@ -1,6 +1,6 @@
 import random
 from collections import defaultdict
-
+#Mosleh
 class Card:
     def __init__(self, suit, value):
         self.suit = suit
@@ -8,7 +8,7 @@ class Card:
 
     def __str__(self):
         return f"{self.value} of {self.suit}"
-
+#Mosleh
 class Deck:
     suits = ["Hearts", "Diamonds", "Clubs", "Spades"]
     values = ["2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K", "A"]
@@ -19,7 +19,7 @@ class Deck:
 
     def shuffle(self):
         random.shuffle(self.cards)
-
+#Mosleh
 class Shoe:
     def __init__(self, num_decks=6):
         self.cards = []
