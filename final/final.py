@@ -124,7 +124,7 @@ def play_game():
         print(f"Current Balance: ${balance}")
         again = input("Play again? (y/n): ").lower()
         if again != 'y':
-            print('Thanks for playing!')
+            print('Thanks for playing! Good game!')
             break
 
 def simulate_strategy():
